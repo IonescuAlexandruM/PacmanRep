@@ -45,6 +45,18 @@ private:
 	bool _pKeyDown;
 	bool _spaceKeyDown;
 	bool _StartScreen;
+	
+	//Moving only XY axes
+	bool _rightmove;
+	bool _leftmove;
+	bool _upmove;
+	bool _downmove;
+
+	//Animating pacman
+	int _pacmanDirection;
+	int _pacmanFrame;
+	int _pacmanCurrentFrameTime;
+	const int _cPacmanFrameTime;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>

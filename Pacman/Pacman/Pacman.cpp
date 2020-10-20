@@ -2,13 +2,23 @@
 
 #include <sstream>
 
-Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(4.0f)
+Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(3.5f), _cPacmanFrameTime(250)
 {
+	//Initialization of all starting points of the game
 	_frameCount = 0;
 	_paused = false;
 	_pKeyDown = false;
 	_StartScreen = true;
 	_spaceKeyDown = false;
+	_leftmove = false;
+	_rightmove = false;
+	_upmove = false;
+	_downmove = false;
+	_pacmanDirection = 0;
+	_pacmanCurrentFrameTime = 0;
+	_pacmanFrame = 0;
+
+
 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60);
@@ -57,9 +67,12 @@ void Pacman::Update(int elapsedTime)
 {
 	// Gets the current state of the keyboard
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
+	_pacmanCurrentFrameTime += elapsedTime;
+	_pacmanSourceRect->Y = _pacmanSourceRect->Height * _pacmanDirection;
 
-	int WinWidth = Graphics::GetViewportWidth();
-	int WinHeight = Graphics::GetViewportHeight();
+	int WinWidth = Graphics::GetViewportWidth()+10;
+	int WinHeight = Graphics::GetViewportHeight()+10;
+	int point0 = 20;
 
 	// Player movement
 	/*if (keyboardState->IsKeyDown(Input::Keys::D))
@@ -74,17 +87,17 @@ void Pacman::Update(int elapsedTime)
 	//Walls
 	if (_pacmanPosition->X + _pacmanSourceRect-> Width>WinWidth)
 	{
-		_pacmanPosition->X = 0 - _pacmanSourceRect->Width;
+		_pacmanPosition->X = point0 - _pacmanSourceRect->Width;
 	}
-	if (_pacmanPosition->X + _pacmanSourceRect->Width <0)
+	if (_pacmanPosition->X + _pacmanSourceRect->Width < point0)
 	{
 		_pacmanPosition->X = WinWidth - _pacmanSourceRect->Width;
 	}
 	if (_pacmanPosition->Y + _pacmanSourceRect->Width > WinHeight)
 	{
-		_pacmanPosition->Y = 0 - _pacmanSourceRect->Width;
+		_pacmanPosition->Y = point0 - _pacmanSourceRect->Width;
 	}
-	if (_pacmanPosition->Y + _pacmanSourceRect->Width < 0)
+	if (_pacmanPosition->Y + _pacmanSourceRect->Width < point0)
 	{
 		_pacmanPosition->Y = WinHeight - _pacmanSourceRect->Width;
 	}
@@ -103,21 +116,63 @@ void Pacman::Update(int elapsedTime)
 	if(keyboardState->IsKeyDown(Input::Keys::SPACE) && !_spaceKeyDown)
 	{
 		_spaceKeyDown = true;
-		_StartScreen = !_StartScreen;
+		_StartScreen = false;
 	}
 	if (keyboardState->IsKeyUp(Input::Keys::SPACE))
 		_spaceKeyDown = false;
 
-	if(!_paused && !_StartScreen)
+	//Movement of pacman
+	if (!_paused && !_StartScreen)
 	{
 		if (keyboardState->IsKeyDown(Input::Keys::D))
-			_pacmanPosition->X += _cPacmanSpeed * elapsedTime;
+			_rightmove = true;
 		if (keyboardState->IsKeyDown(Input::Keys::A))
-			_pacmanPosition->X -= _cPacmanSpeed * elapsedTime;
+			_leftmove = true;
 		if (keyboardState->IsKeyDown(Input::Keys::S))
-			_pacmanPosition->Y += _cPacmanSpeed * elapsedTime;
+			_downmove = true;
 		if (keyboardState->IsKeyDown(Input::Keys::W))
+			_upmove = true;
+
+		if (keyboardState->IsKeyUp(Input::Keys::D))
+			_rightmove = false;
+		if (keyboardState->IsKeyUp(Input::Keys::A))
+			_leftmove = false;
+		if (keyboardState->IsKeyUp(Input::Keys::S))
+			_downmove = false;
+		if (keyboardState->IsKeyUp(Input::Keys::W))
+			_upmove = false;
+
+		if (_rightmove)
+		{
+			_pacmanPosition->X += _cPacmanSpeed * elapsedTime;
+			_pacmanDirection = 0;
+		}
+		else if (_leftmove)
+		{
+			_pacmanPosition->X -= _cPacmanSpeed * elapsedTime;
+			_pacmanDirection = 2;
+		}
+		else if (_upmove)
+		{
 			_pacmanPosition->Y -= _cPacmanSpeed * elapsedTime;
+			_pacmanDirection = 3;
+		}
+		else if (_downmove)
+		{
+			_pacmanPosition->Y += _cPacmanSpeed * elapsedTime;
+			_pacmanDirection = 1;
+		}
+	
+		if(_pacmanCurrentFrameTime>_cPacmanFrameTime)
+		{
+			_pacmanFrame++;
+			if (_pacmanFrame >= 2)
+				_pacmanFrame = 0;
+
+			_pacmanCurrentFrameTime = 0;
+		}
+		_pacmanSourceRect->X = _pacmanSourceRect->Width * _pacmanFrame;
+
 		_frameCount++;
 	}
 	
