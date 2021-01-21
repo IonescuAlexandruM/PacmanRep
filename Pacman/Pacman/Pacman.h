@@ -8,9 +8,12 @@
 	#endif
 #endif
 
-//declaring the number of munchie on the screen
+//declaring the number of types of enemies on the screen
 #define MUNCHIECOUNT 50
 #define GHOSTCOUNT 4
+#define HWALLSCOUNT 14
+#define VWALLSCOUNT 12
+
 // Just need to include main header file
 #include "S2D/S2D.h"
 
@@ -34,6 +37,8 @@ struct Player
 	int frameTime;
 	int frameCount;
 	int score;
+	int lives;
+	int numberofMunchies;
 		
 };
 //Structure of munchie
@@ -50,6 +55,7 @@ struct Enemy
 	int direction;
 	float cherrySpeed;
 	bool dead;
+
 
 };
 
@@ -164,12 +170,17 @@ private:
 	Player* _pacman;
 	Enemy* _munchies[MUNCHIECOUNT];
 	Enemy* _cherry;
+
+	Enemy* _hwalls[HWALLSCOUNT];
+	Enemy* _vwalls[VWALLSCOUNT];
 	Movement* _move;
+
 	MenuState* _menu;
 	MovingEnemy* _ghosts[GHOSTCOUNT];
 	SoundEffect* _pop;
-	SoundEffect* _bruhgh;
 	SoundEffect* _wow;
+	SoundEffect* _backsound;
+	
 	
 	
 	void UpdateGhost(MovingEnemy*, int elapsedTime);
@@ -196,11 +207,14 @@ public:
 
 	//Check methods
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
-	void CheckViewportCollision();
 	void CheckStart(Input::KeyboardState* state, Input::Keys startKey);
 	void CheckGhostCollisions();
 	void CheckCherryCollisions();
 	void CheckMunchieCollisions();
+	void CheckHorizontalWallsCollision(int elapsedTime);
+	void CheckVerticalWallsCollision(int elapsedTime);
+	bool CheckCollision(int x1, int y1, int width1, int height1, int x2, int y2, int widht2, int height2);
+
 	//Update methods
 	void UpdatePacman(int elapsedTime);
 	void UpdateCherry(int elapsedTime);
